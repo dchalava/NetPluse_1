@@ -1,0 +1,26 @@
+from typing import Literal, Protocol
+from uuid import UUID
+
+from app.models import AlertResponse, DeviceResponse
+
+
+class DeviceRepository(Protocol):
+    def add_device(self, device: DeviceResponse) -> DeviceResponse | None: ...
+
+    def list_devices(self) -> list[DeviceResponse]: ...
+
+    def get_device(self, device_id: UUID) -> DeviceResponse | None: ...
+
+    def update_status(
+        self, device_id: UUID, status: Literal["online", "offline"]
+    ) -> DeviceResponse | None: ...
+
+    def transition_status(
+        self, device_id: UUID, status: Literal["online", "offline"]
+    ) -> tuple[DeviceResponse, DeviceResponse] | None: ...
+
+    def save_alert(self, alert: AlertResponse) -> AlertResponse: ...
+
+    def list_alerts(self) -> list[AlertResponse]: ...
+
+    def delete_device(self, device_id: UUID) -> DeviceResponse | None: ...

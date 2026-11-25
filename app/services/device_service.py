@@ -3,7 +3,8 @@ from __future__ import annotations
 from uuid import UUID
 
 from app.events import DeviceEvent, create_offline_alert, event_bus
-from app.models import AlertResponse, DeviceCreate, DeviceResponse, StatusUpdate
+from app.models import AlertResponse, DeviceCreate, DeviceResponse, DeviceSummaryResponse, StatusUpdate
+from app.repositories.contracts import DeviceRepository
 from app.repositories.device_repository import InMemoryDeviceRepository
 
 
@@ -16,7 +17,7 @@ class DeviceNotFoundError(LookupError):
 
 
 class DeviceService:
-    def __init__(self, repository: InMemoryDeviceRepository) -> None:
+    def __init__(self, repository: DeviceRepository) -> None:
         self._repository = repository
 
     def register(self, payload: DeviceCreate) -> DeviceResponse:
@@ -30,6 +31,20 @@ class DeviceService:
     def list(self) -> list[DeviceResponse]:
         return self._repository.list_devices()
 
+    def get_device_summary(self) -> DeviceSummaryResponse:
+        devices = self._repository.list_devices()
+        counts = {"online": 0, "offline": 0}
+        device_types = set()
+        for device in devices:
+            counts[device.status] += 1
+            device_types.add(device.device_type)
+        return DeviceSummaryResponse(
+            total_devices=len(devices),
+            online_count=counts["online"],
+            offline_count=counts["offline"],
+            device_types=sorted(device_types),
+        )
+
     def list_alerts(self) -> list[AlertResponse]:
         return self._repository.list_alerts()
 
@@ -38,6 +53,9 @@ class DeviceService:
         if device is None:
             raise DeviceNotFoundError(f"Device {device_id} not found")
         return device
+
+    def get_device(self, device_id: UUID) -> DeviceResponse:
+        return self.get(device_id)
 
     def update_status(self, device_id: UUID, payload: StatusUpdate) -> DeviceResponse:
         transition = self._repository.transition_status(device_id, payload.status)

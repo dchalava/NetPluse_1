@@ -7,7 +7,7 @@ from uuid import UUID
 from app.models import AlertResponse
 
 if TYPE_CHECKING:
-    from app.repositories.device_repository import InMemoryDeviceRepository
+    from app.repositories.contracts import DeviceRepository
 
 
 @dataclass(frozen=True)
@@ -35,7 +35,7 @@ class EventBus:
 event_bus = EventBus()
 
 
-def create_offline_alert(repository: "InMemoryDeviceRepository", device_id: UUID) -> None:
+def create_offline_alert(repository: "DeviceRepository", device_id: UUID) -> None:
     repository.save_alert(
         AlertResponse(
             device_id=device_id,

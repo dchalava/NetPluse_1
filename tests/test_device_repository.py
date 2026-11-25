@@ -66,7 +66,9 @@ def test_health_and_openapi_routes():
         assert {(method, path) for path, methods in paths.items() for method in methods} == {
             ("post", "/devices"),
             ("get", "/devices"),
+            ("get", "/devices/summary"),
             ("get", "/devices/{device_id}"),
+            ("get", "/devices/{device_id}/probe"),
             ("patch", "/devices/{device_id}/status"),
             ("get", "/alerts"),
             ("get", "/health"),
